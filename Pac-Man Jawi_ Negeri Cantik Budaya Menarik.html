@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pac-Man Jawi: Negeri Cantik Budaya Menarik</title>
+<link href="https://fonts.googleapis.com/css2?family=Lateef:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07031a;--card:#150b3d;--ink:#fff7e0;--gold:#ffd400;--blue:#3b5bff;--red:#ff4d6d;--green:#2ee59d;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:radial-gradient(circle at 50% 0,#1d1060,var(--bg) 70%);color:var(--ink);font-family:system-ui,"Segoe UI",Roboto,sans-serif;overflow:hidden;touch-action:manipulation;user-select:none}
+body{display:flex;flex-direction:column}
+header{padding:6px 10px;text-align:center}
+header h1{margin:0;font-size:clamp(14px,3.2vw,22px);color:var(--gold);letter-spacing:.5px}
+.hud{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:4px 8px}
+.hud div{background:#ffffff14;border:1px solid #ffffff26;border-radius:999px;padding:3px 12px;font-weight:700;font-size:clamp(12px,2.6vw,17px);white-space:nowrap}
+.hud button{background:#ffffff14;border:1px solid #ffffff26;color:inherit;border-radius:999px;padding:3px 12px;font-size:16px;cursor:pointer}
+#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px}
+#cv{border-radius:12px;box-shadow:0 0 28px #3b5bff66;touch-action:none;background:#05010f;max-width:100%}
+#stage.shake{animation:sh .4s}
+@keyframes sh{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.foot{text-align:center;font-size:12px;opacity:.7;padding:2px 6px 6px}
+#ov{position:fixed;inset:0;background:#05010fd9;display:none;overflow:auto;z-index:20;padding:12px;padding-top:max(12px,env(safe-area-inset-top,0px));padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
+#ov.on{display:flex}
+.card{margin:auto;width:min(560px,100%);background:var(--card);border:2px solid var(--blue);border-radius:20px;padding:clamp(14px,3vw,26px);text-align:center;box-shadow:0 0 40px #3b5bff55}
+.card h2{margin:4px 0 10px;color:var(--gold)}
+.card ul{text-align:left;line-height:1.5;padding-left:20px;margin:8px 0 14px;font-size:clamp(13px,2.8vw,16px)}
+.btn{background:var(--gold);color:#2a1a00;border:0;border-radius:14px;padding:12px 26px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 4px 0 #b39500}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #b39500}
+.tag{display:inline-block;background:#ffffff1f;border-radius:999px;padding:2px 12px;font-size:13px}
+.rumi{font-size:clamp(26px,7vw,42px);margin:6px 0}
+.ans{font-family:Lateef,"Noto Naskh Arabic","Traditional Arabic","Segoe UI",serif;font-size:clamp(38px,10vw,56px);min-height:1.5em;line-height:1.5;background:#000;border:2px dashed var(--blue);border-radius:12px;margin:6px 0 10px;padding:0 10px;direction:rtl}
+.kr{display:flex;gap:4px;justify-content:center;margin-bottom:4px;direction:rtl}
+.kr button{flex:1;min-width:0;max-width:52px;height:clamp(40px,8vw,50px);font-family:Lateef,"Noto Naskh Arabic",serif;font-size:clamp(22px,5.5vw,30px);background:#2a1d6b;color:var(--ink);border:1px solid #5b4bd0;border-radius:8px;cursor:pointer;padding:0}
+.kr button:active{background:var(--blue)}
+.kr .w{max-width:140px;flex:2;font-family:inherit;font-size:16px;font-weight:800}
+.kr .ok{background:var(--green);color:#042;border-color:var(--green)}
+#fb{font-size:clamp(16px,4vw,22px);font-weight:800;min-height:1.4em;margin-top:6px}
+#fb .big{font-size:56px;display:block}
+#fb .jw{font-family:Lateef,serif;font-size:40px;color:var(--gold);direction:rtl;display:block}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+#fx span{position:absolute;animation:rise 1.6s ease-out forwards}
+#fx span.up{bottom:-60px}#fx span.dn{top:-60px;animation-name:fall}
+@keyframes rise{to{transform:translateY(-115vh) rotate(40deg);opacity:0}}
+@keyframes fall{to{transform:translateY(115vh) rotate(-30deg);opacity:0}}
+</style>
+</head>
+<body>
+<header><h1>🏮 Negeri Cantik, Budaya Menarik 🏮</h1></header>
+<div class="hud"><div id="hr">Pusingan 1/2</div><div>⭐ <span id="sc">0</span></div><div>❤️ <span id="lv">15</span></div><div>❓ <span id="qs">0</span>/5</div><button id="mt" aria-label="Bunyi">🔊</button></div>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div class="foot">Anak panah (komputer) · Leret ke kiri, kanan, atas, bawah (telefon, tablet, papan pintar)</div>
+<div id="ov" class="on"></div>
+<div id="fx"></div>
+<script>
+const $=id=>document.getElementById(id);
+const WORDS=[["Disebabkan","دسببکن"],["Berkaitan","برکاءيتن"],["Mempamirkan","ممڤاميرکن"],["Menggunakan","مڠݢوناکن"],["Persekitaran","ڤرسکيتارن"],["Kepekaan","کڤيکاءن"],["Dipengaruhi","دڤڠاروهي"],["Perusahaan","ڤراوسهاءن"],["Dikembangkan","دکمبڠکن"],["Penciptaan","ڤنچيڤتاءن"]];
+const MAP=["#################","#.......#.......#","#.##.##.#.##.##.#","#...............#","#.##.#.###.#.##.#","#....#..#..#....#","####.##.#.##.####","#...............#","####.##.#.##.####","#....#..#..#....#","#.##.#.###.#.##.#","#...............#","#.##.##.#.##.##.#","#.......#.......#","#################"];
+const W=17,H=15,T=32,K=2,GS=[[1,1],[15,1],[1,13],[15,13]],COL=["#ff4d6d","#4dd2ff","#ffa94d","#c77dff"],CH=[.75,.55,.4,.65];
+const cv=$('cv'),cx=cv.getContext('2d');cv.width=W*T*K;cv.height=H*T*K;cx.setTransform(K,0,0,K,0,0);
+const open=(x,y)=>y>=0&&y<H&&x>=0&&x<W&&MAP[y][x]!=='#';
+const rr=(c,x,y,w,h,r)=>{c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h)};
+/* maze prerender */
+const mz=document.createElement('canvas');mz.width=cv.width;mz.height=cv.height;
+(function(){const c=mz.getContext('2d');c.scale(K,K);for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(MAP[y][x]==='#'){rr(c,x*T+2,y*T+2,T-4,T-4,7);c.fillStyle='#0b1160';c.fill();c.strokeStyle='#3b5bff';c.lineWidth=2;c.stroke()}})();
+/* audio */
+let AC,mute=false;
+function snd(f,d=.1,ty='square',v=.05,t0=0,f2){if(mute)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const n=AC.currentTime+t0,o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.setValueAtTime(f,n);if(f2)o.frequency.exponentialRampToValueAtTime(f2,n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d)}catch(e){}}
+let dt2=0;const sfx={dot:()=>snd((dt2^=1)?440:520,.05,'square',.02),pel:()=>snd(300,.25,'sawtooth',.05,0,900),ok:()=>[523,659,784,1047].forEach((f,i)=>snd(f,.2,'triangle',.09,i*.09)),bad:()=>snd(300,.45,'sawtooth',.08,0,70),hit:()=>snd(700,.5,'square',.07,0,60),win:()=>[523,659,784,659,784,1047,1319].forEach((f,i)=>snd(f,.22,'triangle',.09,i*.12))};
+$('mt').onclick=()=>{mute=!mute;$('mt').textContent=mute?'🔇':'🔊'};
+/* fx */
+function burst(a,dn,n=16){const f=$('fx');for(let i=0;i<n;i++){const s=document.createElement('span');s.textContent=a[i%a.length];s.className=dn?'dn':'up';s.style.left=Math.random()*94+'%';s.style.fontSize=24+Math.random()*30+'px';s.style.animationDelay=Math.random()*.4+'s';f.appendChild(s);setTimeout(()=>s.remove(),2200)}}
+/* state */
+let state='menu',cur=[],rd=0,qn=0,lives=15,score=0,P,G=[],dots=[],pel=new Set(),inv=0,t=0,ans='',lock=false;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const mk=(x,y,sp)=>({tx:x,ty:y,dx:0,dy:0,p:0,nx:0,ny:0,sp,ld:[1,0],wait:0,chase:0});
+const pos=e=>[e.tx+e.dx*e.p,e.ty+e.dy*e.p];
+function hud(){$('hr').textContent='Pusingan '+(rd+1)+'/2';$('sc').textContent=score;$('lv').textContent=lives;$('qs').textContent=qn}
+function resetPos(){P=mk(8,7,5.6);G=[];for(let i=0;i<3+rd;i++){const g=mk(GS[i][0],GS[i][1],4.1+rd*.6);g.wait=2;g.chase=CH[i]+rd*.1;G.push(g)}}
+function startRound(r){rd=r;qn=0;dots=MAP.map(s=>[...s].map(c=>c!=='#'));dots[7][8]=false;pel=new Set();
+ const c=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(open(x,y)&&Math.abs(x-8)+Math.abs(y-7)>=4&&!GS.some(g=>g[0]===x&&g[1]===y))c.push([x,y]);
+ shuffle(c).slice(0,5).forEach(p=>{pel.add(p[0]+','+p[1]);dots[p[1]][p[0]]=false});
+ resetPos();inv=1.5;state='play';hide();hud()}
+function newGame(){lives=15;score=0;cur=shuffle(WORDS);startRound(0)}
+/* overlay */
+const ov=$('ov');const card=h=>{ov.innerHTML='<div class="card">'+h+'</div>';ov.classList.add('on')};const hide=()=>{ov.classList.remove('on');ov.innerHTML=''};
+function menu(){state='menu';card(`<h2>🎮 Pac-Man Jawi</h2><div class="tag">Tema: Negeri Cantik, Budaya Menarik</div><ul>
+<li><b>Gerakkan Pac-Man:</b> komputer guna butang anak panah ( ← ↑ → ↓ ); telefon, tablet dan papan pintar leret (swipe) ke kiri, kanan, atas atau bawah pada kawasan permainan.</li>
+<li><b>Makan titik kecil</b> sambil berjalan. Makan <b>5 bulatan besar bertanda ?</b> untuk memunculkan soalan. Kedudukan bulatan besar berubah pada setiap pusingan.</li>
+<li><b>Jawab soalan:</b> eja perkataan yang diberi dalam <b>tulisan Jawi</b> menggunakan papan kekunci Jawi di skrin.</li>
+<li><b>Elakkan hantu!</b> Nyawa berkurang jika terkena hantu atau tersalah jawab. Anda mempunyai <b>15 nyawa</b>.</li>
+<li>Ada <b>2 pusingan</b>, setiap pusingan 5 soalan. Satu soalan bernilai <b>10 markah</b> (jumlah 100 markah).</li></ul>
+<button class="btn" onclick="newGame()">▶ Mula Bermain</button>`)}
+function end(win){state='end';if(win)sfx.win();burst(win?['🏆','🎉','⭐','🎊']:['😢','💔'],!win,20);
+ const m=!win?'Nyawa anda sudah habis. Jangan berputus asa, cuba lagi!':score>=90?'Cemerlang! Anda pakar Jawi! 🌟':score>=60?'Bagus! Teruskan usaha anda! 👍':'Tahniah kerana menamatkan permainan. Cuba lagi untuk markah lebih tinggi!';
+ card(`<h2>${win?'🏆 Tahniah!':'💀 Permainan Tamat'}</h2><p style="font-size:20px">Markah anda: <b style="color:var(--gold);font-size:34px">${score}</b> / 100</p><p>${m}</p><button class="btn" onclick="newGame()">🔄 Main Semula</button>`)}
+/* question */
+function ask(){state='q';ans='';lock=false;const w=cur[rd*5+qn];
+ card(`<span class="tag">Soalan ${qn+1}/5 · Pusingan ${rd+1}</span><p style="margin:6px 0 0">Eja perkataan ini dalam tulisan Jawi:</p><h2 class="rumi">${w[0]}</h2><div id="ans" class="ans" dir="rtl" lang="ar"></div><div id="kb"></div><div id="fb"></div>`);
+ const rows0=["ضصثقفغعهخحج","شسيبلاتنمکݢ","ظطزرذدءوۏڠڤ","چڽةئؤأإآ"],kb=$('kb'),rows=["ابتثجچحخد","ذرزسشصضطظ","عغڠفڤقکݢل","منوۏهءيڽ","ةئؤأإآ"];
+ rows.forEach(r=>{const d=document.createElement('div');d.className='kr';[...r].forEach(c=>{const b=document.createElement('button');b.textContent=c;b.onclick=()=>add(c);d.appendChild(b)});kb.appendChild(d)});
+ const d=document.createElement('div');d.className='kr';
+ [['⌫ Padam',del,'w'],['Hantar ✔',submit,'w ok']].forEach(a=>{const b=document.createElement('button');b.textContent=a[0];if(a[2])b.className=a[2];b.onclick=a[1];d.appendChild(b)});kb.appendChild(d)}
+const norm=s=>s.replace(/ك/g,'ک').replace(/[یى]/g,'ي').replace(/\s/g,'');
+const add=c=>{if(lock||ans.length>20)return;ans+=norm(c);$('ans').textContent=ans;snd(700,.04,'square',.03)};
+const del=()=>{if(lock)return;ans=ans.slice(0,-1);$('ans').textContent=ans};
+function submit(){if(lock||!ans)return;lock=true;const w=cur[rd*5+qn],ok=norm(ans)===norm(w[1]);let dead=false;
+ if(ok){score+=10;sfx.ok();burst(['🎉','✨','👏','⭐','🥳'],false,22);$('fb').innerHTML='<span class="big">🎉</span><span style="color:var(--green)">Betul! +10 markah</span>'}
+ else{lives--;sfx.bad();burst(['😢','💔','❌','😵'],true,16);dead=lives<=0;$('fb').innerHTML='<span class="big">😢</span><span style="color:var(--red)">Salah! Nyawa −1</span><span>Jawapan betul:</span><span class="jw" lang="ar">'+w[1]+'</span>'}
+ qn++;hud();
+ setTimeout(()=>{if(dead)return end(false);if(qn>=5){if(rd===0){state='menu';card(`<h2>✅ Pusingan 1 Selesai!</h2><p style="font-size:18px">Markah: <b style="color:var(--gold)">${score}</b> · Nyawa: ❤️ ${lives}</p><p>Pusingan 2: hantu bertambah dan bulatan besar bertukar kedudukan. Bersedia!</p><button class="btn" onclick="startRound(1)">Pusingan 2 ▶</button>`)}else end(true)}else{hide();state='play';inv=1.5}},ok?1500:2600)}
+/* input */
+addEventListener('keydown',e=>{
+ if(state==='q'){if(e.key==='Enter'){e.preventDefault();submit()}else if(e.key==='Backspace'){e.preventDefault();del()}else if(/^[\u0600-\u06FF\u0750-\u077F]$/.test(e.key))add(e.key);return}
+ const m={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(m){e.preventDefault();if(P){P.nx=m[0];P.ny=m[1]}}});
+let sx,sy,sw=false;
+cv.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;sw=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+cv.addEventListener('pointermove',e=>{if(!sw||!P)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.hypot(dx,dy)>22){if(Math.abs(dx)>Math.abs(dy)){P.nx=dx>0?1:-1;P.ny=0}else{P.nx=0;P.ny=dy>0?1:-1}sx=e.clientX;sy=e.clientY}});
+['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,()=>sw=false));
+document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault()},{passive:false});
+/* movement */
+function stepP(e,dt){
+ if((e.dx||e.dy)&&e.nx===-e.dx&&e.ny===-e.dy){e.tx+=e.dx;e.ty+=e.dy;e.p=1-e.p;e.dx=-e.dx;e.dy=-e.dy}
+ if(!e.dx&&!e.dy){if((e.nx||e.ny)&&open(e.tx+e.nx,e.ty+e.ny)){e.dx=e.nx;e.dy=e.ny;e.p=0}else return}
+ e.ld=[e.dx,e.dy];e.p+=e.sp*dt;
+ while(e.p>=1){e.tx+=e.dx;e.ty+=e.dy;e.p-=1;
+  const k=e.tx+','+e.ty;
+  if(pel.has(k)){pel.delete(k);sfx.pel();burst(['✨'],false,6);ask();return}
+  if(dots[e.ty][e.tx]){dots[e.ty][e.tx]=false;sfx.dot()}
+  if((e.nx||e.ny)&&open(e.tx+e.nx,e.ty+e.ny)){e.dx=e.nx;e.dy=e.ny;e.ld=[e.dx,e.dy]}
+  else if(!open(e.tx+e.dx,e.ty+e.dy)){e.dx=e.dy=0;e.p=0;break}}}
+function pick(g){const ds=[[1,0],[-1,0],[0,1],[0,-1]].filter(d=>open(g.tx+d[0],g.ty+d[1]));let c=ds.filter(d=>!(d[0]===-g.dx&&d[1]===-g.dy));if(!c.length)c=ds;
+ const dist=d=>(g.tx+d[0]-P.tx)**2+(g.ty+d[1]-P.ty)**2;
+ const d=Math.random()<g.chase?c.reduce((a,b)=>dist(b)<dist(a)?b:a):c[Math.random()*c.length|0];g.dx=d[0];g.dy=d[1]}
+function stepG(g,dt){if(g.wait>0){g.wait-=dt;return}if(!g.dx&&!g.dy)pick(g);g.p+=g.sp*dt;while(g.p>=1){g.tx+=g.dx;g.ty+=g.dy;g.p-=1;pick(g)}}
+function hit(){lives--;sfx.hit();burst(['💥','👻','😱'],true,10);const s=$('stage');s.classList.remove('shake');void s.offsetWidth;s.classList.add('shake');hud();
+ if(lives<=0)return end(false);resetPos();inv=2.5}
+function update(dt){stepP(P,dt);if(state!=='play')return;G.forEach(g=>stepG(g,dt));if(inv>0){inv-=dt;return}
+ const[px,py]=pos(P);for(const g of G){const[gx,gy]=pos(g);if(g.wait<=0&&Math.hypot(px-gx,py-gy)<.62){hit();break}}}
+/* draw */
+function draw(){cx.clearRect(0,0,W*T,H*T);cx.drawImage(mz,0,0,W*T,H*T);if(!P)return;
+ cx.fillStyle='#ffe9a8';for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(dots[y][x]){cx.beginPath();cx.arc(x*T+T/2,y*T+T/2,2.6,0,6.3);cx.fill()}
+ const pu=1+Math.sin(t*6)*.12;pel.forEach(k=>{const[x,y]=k.split(',').map(Number),X=x*T+T/2,Y=y*T+T/2;cx.fillStyle='#ffd400';cx.shadowColor='#ffd400';cx.shadowBlur=12;cx.beginPath();cx.arc(X,Y,T*.34*pu,0,6.3);cx.fill();cx.shadowBlur=0;cx.fillStyle='#5a2d00';cx.font='bold 17px sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText('?',X,Y+1)});
+ G.forEach((g,i)=>{const[x,y]=pos(g),X=(x+.5)*T,Y=(y+.5)*T,r=T*.4;cx.fillStyle=COL[i];cx.beginPath();cx.arc(X,Y-2,r,Math.PI,0);cx.lineTo(X+r,Y+r);for(let k=0;k<3;k++){cx.lineTo(X+r-(2*k+1)*r/3,Y+r-5);cx.lineTo(X+r-(2*k+2)*r/3,Y+r)}cx.closePath();cx.fill();
+  const[px,py]=pos(P),a=Math.atan2(py-y,px-x),ox=Math.cos(a)*2,oy=Math.sin(a)*2;[-5,5].forEach(d=>{cx.fillStyle='#fff';cx.beginPath();cx.arc(X+d,Y-4,4.2,0,6.3);cx.fill();cx.fillStyle='#10106a';cx.beginPath();cx.arc(X+d+ox,Y-4+oy,2,0,6.3);cx.fill()})});
+ if(inv>0&&((t*10)|0)%2)return;
+ const[x,y]=pos(P),X=(x+.5)*T,Y=(y+.5)*T,m=state==='play'&&(P.dx||P.dy)?Math.abs(Math.sin(t*14))*.6+.05:.3,a=Math.atan2(P.ld[1],P.ld[0]);
+ cx.fillStyle='#ffd400';cx.beginPath();cx.moveTo(X,Y);cx.arc(X,Y,T*.42,a+m,a+6.283-m);cx.closePath();cx.fill();
+ cx.fillStyle='#222';cx.beginPath();cx.arc(X+Math.cos(a-1.2)*T*.18,Y+Math.sin(a-1.2)*T*.18,2.2,0,6.3);cx.fill()}
+function fit(){const s=$('stage'),k=Math.min((s.clientWidth-12)/(W*T),(s.clientHeight-12)/(H*T));cv.style.width=Math.max(120,W*T*k)+'px';cv.style.height=Math.max(106,H*T*k)+'px'}
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));
+let last=0;function loop(ts){requestAnimationFrame(loop);const dt=Math.min((ts-last)/1000,.05);last=ts;t+=dt;if(state==='play')update(dt);draw()}
+fit();menu();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
